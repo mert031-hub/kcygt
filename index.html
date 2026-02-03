@@ -17,14 +17,17 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
         <div class="container">
             <a class="navbar-brand" href="index.html">LUXE<span>BERLIN</span></a>
-            <div class="ms-auto d-flex align-items-center">
-                <a href="#social" class="nav-link d-none d-md-block">Instagram</a>
-                <a href="payment.html" class="nav-link fw-bold position-relative ms-3">
-                    Warenkorb 🛒
-                    <span id="cart-badge"
-                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style="font-size: 0.6rem; display: none;">0</span>
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span
+                    class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#produkte">Kollektion</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#social">Instagram</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold position-relative ms-3" href="payment.html">
+                            Warenkorb 🛒 <span id="cart-badge" class="badge rounded-pill bg-danger"
+                                style="font-size:0.6rem; display:none;">0</span>
+                        </a></li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -39,43 +42,51 @@
         <div id="product-grid-container" class="row g-4"></div>
     </main>
 
-    <section class="social-area" id="social">
+    <section class="social-area py-5 border-top" id="social">
         <div class="container text-center">
             <h2 class="mb-5" style="font-family:'Playfair Display';">@LUXEBERLIN_OFFICIAL</h2>
-            <div class="row g-3 justify-content-center">
-                <div class="col-6 col-md-3">
-                    <div class="insta-box"><img
-                            src="https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?w=400"></div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="insta-box"><img
-                            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400"></div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="insta-box"><img
-                            src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400"></div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="insta-box"><img
-                            src="https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?w=400"></div>
-                </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-3"><img
+                        src="https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?w=400"
+                        class="img-fluid insta-img"></div>
+                <div class="col-6 col-md-3"><img
+                        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400"
+                        class="img-fluid insta-img"></div>
+                <div class="col-6 col-md-3"><img
+                        src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400"
+                        class="img-fluid insta-img"></div>
+                <div class="col-6 col-md-3"><img
+                        src="https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?w=400"
+                        class="img-fluid insta-img"></div>
             </div>
         </div>
     </section>
 
+    <div id="mobile-floating-cart" class="floating-cart-bar d-md-none shadow-lg">
+        <div class="d-flex justify-content-between align-items-center px-4 py-3">
+            <div>
+                <span class="small opacity-75 d-block">Gesamtbetrag</span>
+                <span id="float-total" class="fw-bold">0,00 €</span>
+            </div>
+            <a href="payment.html" class="btn btn-gold px-4 py-2 fw-bold" style="font-size: 0.8rem;">ZUR KASSE</a>
+        </div>
+    </div>
+
     <div class="modal fade" id="luxeModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 rounded-0">
+            <div class="modal-content rounded-0 border-0">
                 <div class="modal-split-body">
                     <button type="button" class="btn-close position-absolute end-0 top-0 m-3 z-3"
                         data-bs-dismiss="modal"></button>
-                    <div class="modal-img-side"><img id="mImg" src="" alt="Product"></div>
+                    <div class="modal-img-side"><img id="mImg" src=""></div>
                     <div class="modal-info-side p-5">
                         <h2 id="mTitle" style="font-family:'Playfair Display';">Produkt</h2>
                         <p id="mDesc" class="text-muted small mb-4"></p>
                         <div class="mb-3">
                             <h3 id="mPriceDisplay" class="fw-bold mb-1">0,00 €</h3>
                             <div id="mStockStatus" class="small fw-bold"></div>
+                            <div id="mStockWarning" class="text-danger small mt-1"
+                                style="display:none; font-weight:600;">Max. Menge erreicht.</div>
                         </div>
                         <div class="qty-control mb-4">
                             <button class="qty-btn" onclick="changeQty(-1)">-</button>
@@ -88,6 +99,10 @@
             </div>
         </div>
     </div>
+
+    <footer class="py-4 text-center text-muted small border-top pb-5 mb-4 d-md-block">
+        &copy; 2026 LUXE BERLIN
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="main.js"></script>

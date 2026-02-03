@@ -1,61 +1,62 @@
-// --- DATABASE ---
 const products = [
     { id: 1, name: 'Signature Watch', price: 1249.00, stock: 5, tag: 'Bestseller', img: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800' },
     { id: 2, name: 'Premium Bag', price: 599.00, stock: 3, tag: '', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800' },
-    { id: 3, name: 'Designer Shades', price: 289.50, stock: 10, tag: 'Beliebt', img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800' },
+    { id: 3, name: 'Designer Shades', price: 289.50, stock: 10, tag: 'Beliebt', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=800' },
     { id: 4, name: 'Urban Sneakers', price: 349.99, stock: 8, tag: 'Neu', img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800' },
     { id: 5, name: 'Cashmere Coat', price: 850.00, stock: 2, tag: '', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=800' },
     { id: 6, name: 'Luxury Belt', price: 129.00, stock: 15, tag: '', img: 'https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?w=800' }
 ];
 
-// Global Değişkenler
 let cart = JSON.parse(localStorage.getItem('luxeCartArray')) || [];
 const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
-let selectedProduct = null;
-let currentQty = 1;
+let selectedProduct = null, currentQty = 1;
 
-// --- GENEL FONKSİYONLAR ---
-
-// Sepet sayacını (Navbar) güncelle
-function updateCartBadge() {
-    const badge = document.getElementById('cart-badge');
-    if (badge) {
-        const totalItems = cart.reduce((acc, i) => acc + i.qty, 0);
-        badge.innerText = totalItems;
-        badge.style.display = totalItems > 0 ? "block" : "none";
-    }
-}
-
-// Veriyi kaydet ve her şeyi yenile
 function saveAndRefresh() {
     localStorage.setItem('luxeCartArray', JSON.stringify(cart));
-    updateCartBadge();
-    // Eğer sepet listesi ekrandaysa onu da güncelle
-    if (document.getElementById('checkout-items')) {
-        loadCheckout();
-    }
+    updateCartUI();
+    if (document.getElementById('checkout-items')) loadCheckout();
 }
 
-// --- ANA SAYFA (INDEX) FONKSİYONLARI ---
+// Tüm Sepet UI Elemanlarını Güncelle
+function updateCartUI() {
+    const totalQty = cart.reduce((acc, i) => acc + i.qty, 0);
+    const totalPrice = cart.reduce((acc, i) => {
+        const p = products.find(x => x.id === i.id);
+        return acc + (p.price * i.qty);
+    }, 0);
+
+    // Navbar Badge
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+        badge.innerText = totalQty; badge.style.display = totalQty > 0 ? "block" : "none";
+    }
+
+    // MOBİL YÜZEN ÇUBUK MANTIĞI
+    const floatBar = document.getElementById('mobile-floating-cart');
+    const floatTotal = document.getElementById('float-total');
+    if (floatBar && floatTotal) {
+        if (totalQty > 0) {
+            floatBar.style.display = "block";
+            floatTotal.innerText = euro.format(totalPrice);
+        } else {
+            floatBar.style.display = "none";
+        }
+    }
+}
 
 function renderProducts() {
     const grid = document.getElementById('product-grid-container');
-    if (!grid) return; // Eğer bu sayfada ürün ızgarası yoksa dur
-
-    grid.innerHTML = "";
+    if (!grid) return; grid.innerHTML = "";
     products.forEach(p => {
-        let displayTag = p.tag;
-        if (p.stock > 0 && p.stock <= 3) displayTag = "Fast ausverkauft";
-
+        const inCart = cart.find(i => i.id === p.id)?.qty || 0;
+        const avail = p.stock - inCart;
+        let tag = avail <= 0 ? "Ausverkauft" : (avail <= 3 ? "Fast ausverkauft" : p.tag);
         grid.innerHTML += `
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="product-card shadow-sm" data-bs-toggle="modal" data-bs-target="#luxeModal" onclick="setupModal(${p.id})">
-                    ${displayTag ? `<span class="product-tag ${displayTag === 'Fast ausverkauft' ? 'tag-danger' : 'tag-default'}">${displayTag}</span>` : ''}
+                    ${tag ? `<span class="product-tag ${avail <= 0 ? 'tag-dark' : 'tag-danger'}">${tag}</span>` : ''}
                     <div class="product-img-box"><img src="${p.img}"></div>
-                    <div class="product-info p-4 text-center">
-                        <h3 class="h5 mb-2" style="font-family:'Playfair Display'">${p.name}</h3>
-                        <span class="price">${euro.format(p.price)}</span>
-                    </div>
+                    <div class="product-info p-4 text-center"><h3 class="h5 mb-2">${p.name}</h3><span class="price">${euro.format(p.price)}</span></div>
                 </div>
             </div>`;
     });
@@ -63,137 +64,79 @@ function renderProducts() {
 
 function setupModal(id) {
     selectedProduct = products.find(p => p.id === id);
-    currentQty = 1;
+    const inCart = cart.find(i => i.id === selectedProduct.id)?.qty || 0;
+    const avail = selectedProduct.stock - inCart;
+    currentQty = avail > 0 ? 1 : 0;
+    document.getElementById('mStockWarning').style.display = "none";
     document.getElementById('mImg').src = selectedProduct.img;
     document.getElementById('mTitle').innerText = selectedProduct.name;
     updateModalUI();
 }
 
 function changeQty(val) {
-    if (!selectedProduct) return;
     const inCart = cart.find(i => i.id === selectedProduct.id)?.qty || 0;
+    const avail = selectedProduct.stock - inCart;
     const next = currentQty + val;
-    if (next >= 1 && (next + inCart) <= selectedProduct.stock) {
-        currentQty = next;
-        updateModalUI();
-    }
+    if (next >= 1 && next <= avail) { currentQty = next; document.getElementById('mStockWarning').style.display = "none"; }
+    else if (next > avail && avail > 0) { document.getElementById('mStockWarning').style.display = "block"; }
+    updateModalUI();
 }
 
 function updateModalUI() {
-    const priceEl = document.getElementById('mPriceDisplay');
-    const qtyEl = document.getElementById('qtyInput');
-    const stockEl = document.getElementById('mStockStatus');
-
-    if (qtyEl) qtyEl.value = currentQty;
-    if (priceEl) priceEl.innerText = euro.format(selectedProduct.price * currentQty);
-
     const inCart = cart.find(i => i.id === selectedProduct.id)?.qty || 0;
-    if (stockEl) stockEl.innerText = `Vorrätig: ${selectedProduct.stock - inCart}`;
+    const avail = selectedProduct.stock - inCart;
+    document.getElementById('qtyInput').value = currentQty;
+    document.getElementById('mPriceDisplay').innerText = euro.format(selectedProduct.price * currentQty);
+    const btn = document.getElementById('add-to-cart-btn');
+    btn.disabled = avail <= 0;
+    document.getElementById('mStockStatus').innerText = avail > 0 ? `Vorrätig: ${avail}` : "Ausverkauft";
 }
 
 function addToCart() {
-    if (!selectedProduct) return;
-    const existing = cart.find(i => i.id === selectedProduct.id);
-    if (existing) {
-        existing.qty += currentQty;
-    } else {
-        cart.push({ id: selectedProduct.id, qty: currentQty });
-    }
-    saveAndRefresh();
-
-    // Bootstrap modalını kapat
-    const modalEl = document.getElementById('luxeModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
+    if (currentQty <= 0) return;
+    const item = cart.find(i => i.id === selectedProduct.id);
+    if (item) item.qty += currentQty; else cart.push({ id: selectedProduct.id, qty: currentQty });
+    saveAndRefresh(); renderProducts(); bootstrap.Modal.getInstance(document.getElementById('luxeModal')).hide();
 }
-
-// --- ÖDEME SAYFASI (PAYMENT) FONKSİYONLARI ---
 
 function updateCartItemQty(id, delta) {
-    const item = cart.find(i => i.id === id);
-    const pInfo = products.find(p => p.id === id);
-    if (item) {
-        const nextQty = item.qty + delta;
-        if (nextQty >= 1 && nextQty <= pInfo.stock) {
-            item.qty = nextQty;
-            saveAndRefresh();
-        } else if (nextQty < 1) {
-            removeFromCart(id);
-        }
-    }
+    const item = cart.find(i => i.id === id), p = products.find(x => x.id === id);
+    if (item && item.qty + delta <= p.stock && item.qty + delta >= 1) { item.qty += delta; saveAndRefresh(); }
+    else if (item && item.qty + delta < 1) removeFromCart(id);
 }
 
-function removeFromCart(id) {
-    cart = cart.filter(i => i.id !== id);
-    saveAndRefresh();
-}
-
-function clearFullCart() {
-    if (confirm("Warenkorb wirklich leeren?")) {
-        cart = [];
-        saveAndRefresh();
-    }
-}
+function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveAndRefresh(); if (document.getElementById('product-grid-container')) renderProducts(); }
+function clearFullCart() { if (confirm("Leeren?")) { cart = []; saveAndRefresh(); if (document.getElementById('product-grid-container')) renderProducts(); } }
 
 function loadCheckout() {
     const container = document.getElementById('checkout-items');
-    if (!container) return; // Eğer ödeme sayfasında değilsek dur
-
-    let subtotal = 0;
-    container.innerHTML = "";
-
-    if (cart.length === 0) {
-        container.innerHTML = "<p class='small opacity-50 text-center py-5'>Ihr Warenkorb ist aktuell leer.</p>";
-    }
-
+    if (!container) return;
+    let sub = 0; container.innerHTML = cart.length ? "" : "<div class='text-center py-5 opacity-50'>Warenkorb leer.</div>";
     cart.forEach(item => {
         const p = products.find(x => x.id === item.id);
-        const total = p.price * item.qty;
-        subtotal += total;
-
+        const tot = p.price * item.qty; sub += tot;
         container.innerHTML += `
-            <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-                <img src="${p.img}" style="width:70px; height:70px; object-fit:cover;" class="me-3 shadow-sm">
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-10">
+                <img src="${p.img}" style="width:50px; height:50px; object-fit:cover;" class="me-3">
                 <div class="flex-grow-1">
                     <div class="small fw-bold mb-1">${p.name}</div>
-                    <div class="d-flex align-items-center mb-2">
-                        <button class="btn btn-xs btn-outline-light py-0 px-2 rounded-0" onclick="updateCartItemQty(${p.id}, -1)">-</button>
-                        <span class="mx-3 small fw-bold">${item.qty}</span>
-                        <button class="btn btn-xs btn-outline-light py-0 px-2 rounded-0" onclick="updateCartItemQty(${p.id}, 1)">+</button>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-xs btn-outline-light py-0 px-2" onclick="updateCartItemQty(${p.id}, -1)">-</button>
+                        <span class="mx-2 small">${item.qty}</span>
+                        <button class="btn btn-xs btn-outline-light py-0 px-2" onclick="updateCartItemQty(${p.id}, 1)">+</button>
+                        <button onclick="removeFromCart(${p.id})" class="btn p-0 text-danger border-0 ms-3" style="font-size:0.6rem; font-weight:700;">LÖSCHEN</button>
                     </div>
-                    <button onclick="removeFromCart(${p.id})" class="btn p-0 text-danger small border-0 opacity-75" style="font-size:0.6rem; letter-spacing:1px;">LÖSCHEN</button>
                 </div>
-                <div class="text-end">
-                    <div class="small fw-bold">${euro.format(total)}</div>
-                </div>
+                <div class="text-end small fw-bold">${euro.format(tot)}</div>
             </div>`;
     });
-
-    const net = subtotal / 1.19;
-    const tax = subtotal - net;
-
-    const netEl = document.getElementById('summary-net');
-    const taxEl = document.getElementById('summary-tax');
-    const totalEl = document.getElementById('summary-total');
-
-    if (netEl) netEl.innerText = euro.format(net);
-    if (taxEl) taxEl.innerText = euro.format(tax);
-    if (totalEl) totalEl.innerText = euro.format(subtotal);
+    const net = sub / 1.19;
+    document.getElementById('summary-net').innerText = euro.format(net);
+    document.getElementById('summary-tax').innerText = euro.format(sub - net);
+    document.getElementById('summary-total').innerText = euro.format(sub);
 }
 
-// --- INITIALIZATION (BAŞLATMA) ---
-
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Her zaman sepet sayacını güncelle
-    updateCartBadge();
-
-    // 2. Eğer ürün gridi varsa, ürünleri bas (Index sayfasıdır)
-    if (document.getElementById('product-grid-container')) {
-        renderProducts();
-    }
-
-    // 3. Eğer ödeme listesi varsa, sepeti yükle (Payment sayfasıdır)
-    if (document.getElementById('checkout-items')) {
-        loadCheckout();
-    }
+    updateCartUI(); renderProducts();
+    if (document.getElementById('checkout-items')) loadCheckout();
 });
