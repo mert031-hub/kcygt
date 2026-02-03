@@ -9,65 +9,82 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="bg-light d-flex align-items-center min-vh-100 py-5">
+<body class="bg-light min-vh-100 py-5">
 
-    <div class="container checkout-container-compact shadow-lg p-0">
+    <div class="container checkout-container-compact shadow-lg bg-white p-0">
         <div class="row g-0">
-            <div class="col-lg-7 p-4 p-md-5">
-                <a href="index.html" class="text-muted text-decoration-none small fw-bold">← ZURÜCK</a>
-                <h1 class="mt-3 mb-4" style="font-family:'Playfair Display';">Kasse</h1>
-                <form class="row g-2">
+            <div class="col-lg-7 p-4 p-md-5 border-end">
+                <a href="index.html" class="text-muted text-decoration-none small fw-bold">← WEITER EINKAUFEN</a>
+                <h2 class="mt-3 mb-4" style="font-family:'Playfair Display';">Lieferadresse</h2>
+
+                <form class="row g-3">
                     <div class="col-md-6"><label class="form-label">Vorname</label><input type="text"
-                            class="form-control" placeholder="z.B. Max"></div>
+                            class="form-control" placeholder="z.B. Max" required></div>
                     <div class="col-md-6"><label class="form-label">Nachname</label><input type="text"
-                            class="form-control" placeholder="z.B. Mustermann"></div>
+                            class="form-control" placeholder="z.B. Mustermann" required></div>
                     <div class="col-12"><label class="form-label">E-Mail</label><input type="email" class="form-control"
-                            placeholder="max@beispiel.de"></div>
+                            placeholder="name@beispiel.de" required></div>
                     <div class="col-12"><label class="form-label">Adresse</label><input type="text" class="form-control"
-                            placeholder="Hauptstraße 1, Berlin"></div>
+                            placeholder="Hauptstraße 12, 10115 Berlin" required></div>
 
                     <div class="col-12 mt-4">
-                        <label class="form-label mb-2 d-block">Zahlungsart</label>
+                        <label class="form-label mb-3 d-block fw-bold border-bottom pb-2">Zahlungsart</label>
                         <div class="row g-2">
                             <div class="col-6">
-                                <label class="w-100">
+                                <label class="w-100 mb-0">
                                     <input type="radio" name="p" class="d-none" checked>
                                     <div class="pay-card-custom"><span>💳</span><small
-                                            class="fw-bold mt-1">KREDITKARTE</small></div>
+                                            class="fw-bold mt-1 d-block">KREDITKARTE</small></div>
                                 </label>
                             </div>
                             <div class="col-6">
-                                <label class="w-100">
+                                <label class="w-100 mb-0">
                                     <input type="radio" name="p" class="d-none">
                                     <div class="pay-card-custom"><span>🅿️</span><small
-                                            class="fw-bold mt-1">PAYPAL</small></div>
+                                            class="fw-bold mt-1 d-block">PAYPAL</small></div>
                                 </label>
                             </div>
                         </div>
                     </div>
                     <div class="col-12 mt-5">
-                        <button type="submit" class="btn-luxe py-3">BESTELLUNG ABSCHLIESSEN</button>
+                        <button type="submit" class="btn-luxe py-3 w-100">BESTELLUNG ABSCHLIESSEN</button>
                     </div>
                 </form>
             </div>
 
-            <div class="col-lg-5 checkout-aside">
-                <div class="w-100 text-center text-lg-start">
-                    <h2 class="mb-4"
-                        style="font-family:'Playfair Display'; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px;">
-                        Übersicht</h2>
-                    <div class="d-flex justify-content-between mb-2 opacity-75 small">
-                        <span>Zwischensumme</span><span>1.249,00 €</span></div>
-                    <div class="d-flex justify-content-between mb-4 small"><span>Versand</span><span
-                            style="color:var(--gold);">GRATIS</span></div>
-                    <hr class="bg-secondary">
-                    <div class="d-flex justify-content-between summary-total mt-4"><span>Gesamt</span><span>1.249,00
-                            €</span></div>
+            <div class="col-lg-5 checkout-aside p-4 p-md-5 text-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0" style="font-family:'Playfair Display';">Ihr Warenkorb</h3>
+                    <button class="btn btn-sm btn-outline-light rounded-0 opacity-50" onclick="clearFullCart()"
+                        style="font-size: 0.65rem;">LEEREN</button>
+                </div>
+
+                <div id="checkout-items" class="mb-4" style="max-height: 450px; overflow-y: auto;"></div>
+
+                <div class="summary-math border-top pt-4">
+                    <div class="d-flex justify-content-between mb-2 small opacity-75">
+                        <span>Netto</span>
+                        <span id="summary-net">0,00 €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small opacity-75">
+                        <span>MwSt. (19%)</span>
+                        <span id="summary-tax">0,00 €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4 small text-success fw-bold">
+                        <span>Versand</span>
+                        <span>KOSTENLOS</span>
+                    </div>
+                    <hr class="bg-secondary opacity-50">
+                    <div class="d-flex justify-content-between summary-total mt-4">
+                        <span class="h4">Gesamt</span>
+                        <span id="summary-total" class="h4">0,00 €</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="main.js"></script>
 </body>
 
 </html>
